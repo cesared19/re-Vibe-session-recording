@@ -9,7 +9,7 @@ namespace XRSessionCapture
 {
     /// <summary>
     /// Reads the headset and controllers from the Input System. Controls are looked up by name and then by usage,
-    /// so it works with the VIVE Focus 3 OpenXR profile and with any other OpenXR controller profile.
+    /// so it works with the VIVE Focus 3 OpenXR profile and with any other OpenXR controller profile. When the Input System doesn't have the device (a Wave XR project, for example), Unity's XR input subsystem is read instead; see <see cref="XRSubsystemInputReader"/>.
     /// Replay devices are ignored, so recording while replaying is not possible by accident.
     /// </summary>
     public static class XRInputReader
@@ -57,11 +57,20 @@ namespace XRSessionCapture
             return found;
         }
 
-        public static HeadSample ReadHead()
+        /// <summary>Where a sample came from last time (for diagnostics): true when the XR subsystem supplied it.</summary>
+        public static bool LastHeadFromSubsystem { get; private set; }
+        public static bool LastLeftFromSubsystem { get; private set; }
+        public static bool LastRightFromSubsystem { get; private set; }
+
+        public static HeadSample ReadHead(CaptureSource source = CaptureSource.Auto)
         {
-            var hmd = FindHeadset();
+            var hmd = source == CaptureSource.XRSubsystem ? null : FindHeadset();
             if (hmd == null)
-                return new HeadSample { pose = PoseSample.Identity };
+            {
+                LastHeadFromSubsystem = source != CaptureSource.InputSystem && XRSubsystemInputReader.TryFindHeadset(out _);
+                return LastHeadFromSubsystem ? XRSubsystemInputReader.ReadHead() : new HeadSample { pose = PoseSample.Identity };
+            }
+            LastHeadFromSubsystem = false;
             var position = hmd.centerEyePosition ?? hmd.devicePosition;
             var rotation = hmd.centerEyeRotation ?? hmd.deviceRotation;
             return new HeadSample
@@ -72,11 +81,16 @@ namespace XRSessionCapture
             };
         }
 
-        public static ControllerSample ReadController(bool left)
+        public static ControllerSample ReadController(bool left, CaptureSource source = CaptureSource.Auto)
         {
-            var device = FindController(left);
+            var device = source == CaptureSource.XRSubsystem ? null : FindController(left);
             if (device == null)
-                return default;
+            {
+                var fromSubsystem = source != CaptureSource.InputSystem && XRSubsystemInputReader.TryFindController(left, out _);
+                if (left) LastLeftFromSubsystem = fromSubsystem; else LastRightFromSubsystem = fromSubsystem;
+                return fromSubsystem ? XRSubsystemInputReader.ReadController(left) : default;
+            }
+            if (left) LastLeftFromSubsystem = false; else LastRightFromSubsystem = false;
             var c = GetControls(device);
             var devicePose = new PoseSample(Read(c.devicePosition), ReadRotation(c.deviceRotation));
             var sample = new ControllerSample

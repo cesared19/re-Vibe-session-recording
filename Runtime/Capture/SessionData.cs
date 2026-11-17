@@ -137,6 +137,10 @@ namespace XRSessionCapture
         public string deviceName;
         public string operatingSystem;
         public string xrDevice;
+        /// <summary>The XR plug-in the app ran on: "OpenXR", "Wave XR", "Other XR" or "No XR". Empty in captures older than 0.4.0.</summary>
+        public string xrBackend;
+        /// <summary>Where the poses came from: "Input System", "XR subsystem" or "Mixed". Empty in older captures.</summary>
+        public string captureSource;
         public string applicationId;
         public string applicationVersion;
         public string unityVersion;

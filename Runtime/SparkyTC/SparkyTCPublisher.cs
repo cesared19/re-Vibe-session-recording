@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -254,7 +253,8 @@ namespace XRSessionCapture.SparkyTC
         {
             using (var buffer = new MemoryStream())
             {
-                using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+                // not System.IO.Compression.ZipArchive: Unity's .NET Standard 2.0 profile can't reference it (CS1069)
+                using (var zip = new SimpleZip(buffer))
                 {
                     var replayRoot = $"{SessionCaptureManager.ReplaysFolderName}/{Path.GetFileName(item.replayDirectory)}";
                     AddFolder(zip, item.replayDirectory, replayRoot);
@@ -263,21 +263,24 @@ namespace XRSessionCapture.SparkyTC
                     {
                         var path = Path.Combine(item.captureDirectory, name);
                         if (File.Exists(path))
-                            zip.CreateEntryFromFile(path, name, System.IO.Compression.CompressionLevel.Optimal);
+                            zip.AddFile(name, path);
                     }
                 }
                 return buffer.ToArray();
             }
         }
 
-        static void AddFolder(ZipArchive zip, string folder, string entryRoot)
+        static void AddFolder(SimpleZip zip, string folder, string entryRoot)
         {
             if (!Directory.Exists(folder))
                 return;
-            foreach (var file in Directory.GetFiles(folder, "*", SearchOption.AllDirectories))
+            var files = Directory.GetFiles(folder, "*", SearchOption.AllDirectories);
+            // the same order every time, so the same replay always gives the same .zip
+            Array.Sort(files, StringComparer.Ordinal);
+            foreach (var file in files)
             {
                 var relative = file.Substring(folder.Length).TrimStart('/', '\\').Replace('\\', '/');
-                zip.CreateEntryFromFile(file, entryRoot + "/" + relative, System.IO.Compression.CompressionLevel.Optimal);
+                zip.AddFile(entryRoot + "/" + relative, file);
             }
         }
 

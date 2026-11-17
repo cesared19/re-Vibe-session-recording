@@ -46,6 +46,8 @@ namespace XRSessionCapture
         [Header("Recording")]
         [Tooltip("Start recording as soon as this component starts. Recording from scene load makes replays line up best.")]
         public bool recordOnStart;
+        [Tooltip("Where the headset and controllers are read from. Auto uses the Input System and falls back to Unity's XR input subsystem, which Wave XR and OpenXR both feed.")]
+        public CaptureSource captureSource = CaptureSource.Auto;
         [Tooltip("Seed UnityEngine.Random when recording and replaying, so random gameplay repeats.")]
         public bool useFixedRandomSeed = true;
         public int randomSeed = 12345;
@@ -297,6 +299,7 @@ namespace XRSessionCapture
                 deviceName = SystemInfo.deviceName,
                 operatingSystem = SystemInfo.operatingSystem,
                 xrDevice = UnityEngine.XR.XRSettings.loadedDeviceName,
+                xrBackend = XRBackendClassifier.DisplayName(XRBackendInfo.Detect()),
                 applicationId = Application.identifier,
                 applicationVersion = Application.version,
                 unityVersion = Application.unityVersion,
@@ -308,6 +311,19 @@ namespace XRSessionCapture
                 randomSeed = randomSeed,
                 notes = notes,
             };
+            // one read, to learn which input path supplies the poses
+            XRInputReader.ReadHead(captureSource);
+            XRInputReader.ReadController(true, captureSource);
+            XRInputReader.ReadController(false, captureSource);
+            m_Info.captureSource = XRBackendInfo.SourceLabel();
+            try
+            {
+                File.WriteAllText(Path.Combine(directory, "xr-info.txt"), XRBackendInfo.Describe(captureSource));
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[XRSessionCapture] Could not write xr-info.txt: " + e.Message);
+            }
             if (useFixedRandomSeed)
                 UnityEngine.Random.InitState(randomSeed);
 
@@ -325,6 +341,17 @@ namespace XRSessionCapture
             Debug.Log($"[XRSessionCapture] Recording to {directory}");
             RecordingStarted?.Invoke(directory);
             return directory;
+        }
+
+        void WarnAboutVendorBindings()
+        {
+            if (!replayOptions.virtualDevices)
+                return;
+            var bindings = XRBackendInfo.FindVendorSpecificBindings();
+            if (bindings.Count == 0)
+                return;
+            Debug.LogWarning("[XRSessionCapture] These input actions are bound to a device layout of the XR plug-in, which a replay's generic XR devices don't feed, so they won't follow the replay: "
+                + string.Join(", ", bindings) + ". Bind them to <XRController> / <XRHMD> as well, or read the replayed input with ReplayInput and place objects with ReplayPoseTargets.");
         }
 
         public void StopRecording()
@@ -380,9 +407,9 @@ namespace XRSessionCapture
                 frame = m_RecordedFrame,
                 time = time,
                 deltaTime = Time.unscaledDeltaTime,
-                head = XRInputReader.ReadHead(),
-                left = XRInputReader.ReadController(true),
-                right = XRInputReader.ReadController(false),
+                head = XRInputReader.ReadHead(captureSource),
+                left = XRInputReader.ReadController(true, captureSource),
+                right = XRInputReader.ReadController(false, captureSource),
             };
             m_Writer.WriteFrame(sample);
 
@@ -504,6 +531,7 @@ namespace XRSessionCapture
             m_MetricsLog = new MetricsLog(replayDirectory);
             m_Player = new SessionPlayer(data, replayOptions);
             m_Player.Start();
+            WarnAboutVendorBindings();
             State = CaptureState.Replaying;
             Debug.Log($"[XRSessionCapture] Replaying {path} ({data.frames.Count} frames, {data.Duration:0.0} s) into {replayDirectory}");
             return true;
@@ -690,7 +718,7 @@ namespace XRSessionCapture
             if (State == CaptureState.Replaying && m_Player != null && m_Player.CurrentIndex >= 0)
                 sample = left ? m_Player.Current.left : m_Player.Current.right;
             else
-                sample = XRInputReader.ReadController(left);
+                sample = XRInputReader.ReadController(left, captureSource);
             if (!sample.connected || (!sample.isTracked && sample.trackingState == 0))
                 return null;
             var camera = HeadCamera;

@@ -31,15 +31,16 @@ function buildText(m,state){
   const budget=1000/m.refresh
   const fpsColor=m.frameMs<=budget*1.05?'#4ade80':m.frameMs<=budget*1.5?'#facc15':'#f87171'
   let s=''
-  if(state.kind==='rec') s+=span('#f87171','● REC')+` ${state.clock}   frame ${state.frames}\n`
-  else if(state.kind==='replay') s+=span('#60a5fa','▶ REPLAY')+` ${state.percent}%\n`
+  const backend=' '+span('#71717a','· '+(state.backend||'OpenXR')) // BackendSuffix: the XR plug-in, as found by XRBackendInfo
+  if(state.kind==='rec') s+=span('#f87171','● REC')+` ${state.clock}   frame ${state.frames}`+'\n'
+  else if(state.kind==='replay') s+=span('#60a5fa','▶ REPLAY')+` ${state.percent}%`+'\n'
   else s+=span('#a1a1aa','Idle')+(state.last==null?'':'   last replay: '+(state.last?span('#4ade80','passed'):span('#f87171','failed')))+'\n'
   s+=span(fpsColor,N(1000/m.frameMs,0)+' fps')+`  ${N(m.frameMs,1)} ms  (budget ${N(budget,1)})\n`
   s+=`CPU ${Ms(m.cpu)}  GPU ${Ms(m.gpu)}  main ${Ms(m.main)}\n`
   s+=`XR app GPU ${Ms(m.xrGpu)}  dropped ${m.dropped}\n`
   s+=`Mem ${N(m.mem,0)} MB  GC ${N(m.gc,1)} KB/f\n`
   s+=`Battery ${Pct(m.battery)}  ${N(m.temp,1)} °C  ${thermal(m.thermal)}\n`
-  s+=`Controllers L ${Pct(m.left)}  R ${Pct(m.right)}`
+  s+=`Controllers L ${Pct(m.left)}  R ${Pct(m.right)}`+backend
   return s
 }
 function drawGraph(history,refresh){

@@ -24,6 +24,8 @@ namespace XRSessionCapture
         public ReplayTiming timing = ReplayTiming.FrameLocked;
         [Tooltip("Disable the real headset and controllers while replaying, so they do not fight the replayed input.")]
         public bool disableRealDevices = true;
+        [Tooltip("Create virtual XRHMD and XRController devices that receive the recorded input. Turn it off on projects that read the devices themselves (some Wave XR projects) and use ReplayPoseTargets and ReplayInput instead.")]
+        public bool virtualDevices = true;
         [Tooltip("Playback speed for RealTime timing.")]
         public float speed = 1f;
     }
@@ -79,12 +81,15 @@ namespace XRSessionCapture
             if (m_Capture.frames.Count == 0)
                 throw new InvalidOperationException("The capture has no frames.");
 
-            ReplayLayouts.Register();
-            m_HMD = InputSystem.AddDevice<ReplayHMD>("XRSessionReplayHMD");
-            m_Left = InputSystem.AddDevice<ReplayController>("XRSessionReplayLeft");
-            m_Right = InputSystem.AddDevice<ReplayController>("XRSessionReplayRight");
-            InputSystem.SetDeviceUsage(m_Left, UnityEngine.InputSystem.CommonUsages.LeftHand);
-            InputSystem.SetDeviceUsage(m_Right, UnityEngine.InputSystem.CommonUsages.RightHand);
+            if (m_Options.virtualDevices)
+            {
+                ReplayLayouts.Register();
+                m_HMD = InputSystem.AddDevice<ReplayHMD>("XRSessionReplayHMD");
+                m_Left = InputSystem.AddDevice<ReplayController>("XRSessionReplayLeft");
+                m_Right = InputSystem.AddDevice<ReplayController>("XRSessionReplayRight");
+                InputSystem.SetDeviceUsage(m_Left, UnityEngine.InputSystem.CommonUsages.LeftHand);
+                InputSystem.SetDeviceUsage(m_Right, UnityEngine.InputSystem.CommonUsages.RightHand);
+            }
 
             if (m_Options.disableRealDevices)
             {
@@ -112,6 +117,7 @@ namespace XRSessionCapture
             if (m_Options.timing == ReplayTiming.FrameLocked)
                 Time.captureDeltaTime = m_PreviousCaptureDeltaTime;
 
+            ReplayInput.Clear();
             RemoveDevice(ref m_HMD);
             RemoveDevice(ref m_Left);
             RemoveDevice(ref m_Right);
@@ -202,6 +208,9 @@ namespace XRSessionCapture
 
         void Apply()
         {
+            ReplayInput.Set(m_Current);
+            if (m_HMD == null)
+                return;
             InputSystem.QueueStateEvent(m_HMD, ReplayLayouts.ToState(m_Current.head));
             InputSystem.QueueStateEvent(m_Left, ReplayLayouts.ToState(m_Current.left));
             InputSystem.QueueStateEvent(m_Right, ReplayLayouts.ToState(m_Current.right));
@@ -213,6 +222,7 @@ namespace XRSessionCapture
             if (IsFinished)
                 return;
             IsFinished = true;
+            ReplayInput.Clear();
             InputSystem.onBeforeUpdate -= OnBeforeUpdate;
             if (m_Options.timing == ReplayTiming.FrameLocked)
                 Time.captureDeltaTime = m_PreviousCaptureDeltaTime;
