@@ -163,7 +163,7 @@ El paquete lee el visor y los controles a través del Input System, igual que el
 
 3. Pulsa **Add**. En la lista aparece **XR Session Capture**. Si falta, instala también el **Input System** 1.7 o posterior.
 
-Para fijar una versión (cuando haya etiquetas publicadas), agrega `#v0.1.0` al final de la URL. Para actualizar más adelante, selecciona el paquete en el Package Manager y pulsa **Update**.
+Para fijar una versión, agrega la etiqueta al final de la URL, por ejemplo `#v0.3.1`. Para pasar a otra versión de un paquete fijado, vuelve a pegar la URL con la etiqueta nueva en **Add package from git URL…** (reemplaza la anterior), o cambia la etiqueta en `Packages/manifest.json`. El asistente de instalación también lo hace: eliges la versión y pulsa **Agregar re-Play al proyecto**. Sin etiqueta, el Package Manager sigue la rama principal y su botón **Update** actualiza el paquete.
 
 > **Alternativa sin Git:** descarga el repositorio como .zip desde GitHub (*Code → Download ZIP*), descomprímelo y usa **+ → Add package from disk…**, eligiendo el archivo `package.json` de esa carpeta.
 
@@ -446,6 +446,7 @@ Si la publicación falla (build sin registrar, token de solo lectura, sin conexi
 | La reproducción no mueve la cámara | La cámara debe usar *Tracked Pose Driver (Input System)* (o leer el visor con Input System). Lo que use la API antigua `UnityEngine.XR.InputDevices` no se reproduce. |
 | Todas las capturas fallan en el Editor con una sesión grabada en el visor | Calidad, sombras y antialiasing difieren entre el visor y el PC. Compara en el mismo dispositivo o sube *Pixel Threshold*. |
 | El reporte dice "the capture was cut short" | La app se cerró antes de detener la grabación. Se reproduce hasta donde se grabó. |
+| Al importar el paquete, la consola dice `error CS1069: The type name 'ZipArchive' could not be found in the namespace 'System.IO.Compression'` (en `SparkyTCPublisher.cs`) | Pasa con re-Play **0.3.0** en proyectos con el *API Compatibility Level* en *.NET Standard 2.0* (el valor por defecto en Unity 2020.3). Actualiza a **0.3.1 o posterior** con la URL `...re-Vibe-session-recording.git#v0.3.1`. Mientras tanto, también se resuelve cambiando *Edit → Project Settings → Player → Other Settings → Configuration → API Compatibility Level* a **.NET 4.x**, pero eso afecta a todo el proyecto. |
 | **Connect** está gris | Falta la **SparkyTC URL** o el **token** (paso 18.4). |
 | **Connect** dice que SparkyTC no aceptó el token | Está mal copiado (con espacios o incompleto) o fue revocado. Pide uno nuevo a un admin (paso 18.2). |
 | **Connect** dice que no puede llegar a SparkyTC | Revisa la URL (con `http://` y el puerto `:3000`) y que el PC llegue al servidor: ábrela en el navegador. Si el navegador sí entra, revisa el firewall o la VPN del PC. |

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Compile error in Unity projects that use the .NET Standard 2.0 API level (the default in Unity 2020.3): `error CS1069: The type name 'ZipArchive' could not be found in the namespace 'System.IO.Compression'`, in `SparkyTCPublisher.cs`. The .zip that goes with each published replay is now written by the package's own code (`SimpleZip`), stored without compression since its files are mostly PNG images, so it doesn't depend on that API level. The .zip is valid for Python's `zipfile`, `unzip` and .NET's reader, and the same replay always gives the same bytes.
+
 ## [0.3.0] - 2026-11-12
 
 ### Added
