@@ -230,6 +230,20 @@ namespace XRSessionCapture
             m_Graph.Apply(false);
         }
 
+        string m_BackendLabel = string.Empty;
+        float m_NextBackendCheck;
+
+        // The plug-in is found again every few seconds (it can load after the app starts), not on every frame.
+        string BackendSuffix()
+        {
+            if (Time.unscaledTime >= m_NextBackendCheck)
+            {
+                m_BackendLabel = XRBackendClassifier.ShortName(XRBackendInfo.Detect());
+                m_NextBackendCheck = Time.unscaledTime + (m_BackendLabel.Length == 0 ? 2f : 10f);
+            }
+            return m_BackendLabel.Length == 0 ? string.Empty : " <color=#71717a>· " + m_BackendLabel + "</color>";
+        }
+
         string BuildText(in MetricsFrame m)
         {
             var sb = m_Sb;
@@ -258,7 +272,7 @@ namespace XRSessionCapture
             sb.Append("XR app GPU ").Append(Ms(m.xrAppGpuMs)).Append("  dropped ").Append(m_Manager.DroppedFramesTotal).Append('\n');
             sb.Append("Mem ").Append(float.IsNaN(m.usedMemoryMB) ? "—" : N(m.usedMemoryMB, "0") + " MB").Append("  GC ").Append(float.IsNaN(m.gcAllocKB) ? "—" : N(m.gcAllocKB, "0.0") + " KB/f").Append('\n');
             sb.Append("Battery ").Append(Pct(m.batteryPercent)).Append("  ").Append(float.IsNaN(m.batteryTemperatureC) ? "" : N(m.batteryTemperatureC, "0.0") + " °C  ").Append(Thermal(m.thermalStatus)).Append('\n');
-            sb.Append("Controllers L ").Append(Pct(m.leftControllerBatteryPercent)).Append("  R ").Append(Pct(m.rightControllerBatteryPercent));
+            sb.Append("Controllers L ").Append(Pct(m.leftControllerBatteryPercent)).Append("  R ").Append(Pct(m.rightControllerBatteryPercent)).Append(BackendSuffix());
             return sb.ToString();
         }
 

@@ -23,11 +23,11 @@ Cada sesión es una carpeta con:
 ## Requisitos
 
 - **Unity 2020.3 LTS o posterior** (incluida la 2020.3.49f1), con el **Input System** (1.7 o posterior; el Package Manager lo instala solo). En *Player Settings → Active Input Handling* debe estar **Input System Package** o **Both**.
-- El plugin **VIVE OpenXR** para Android, con el perfil *VIVE Focus 3 Controller*. Funciona con cualquier perfil de OpenXR que use Input System.
+- El plugin **VIVE OpenXR** para Android, con el perfil *VIVE Focus 3 Controller*, **o** el plugin **Wave XR** de HTC (Wave SDK / Wave Essence). Con OpenXR funciona con cualquier perfil que use Input System; con Wave XR lee el visor y los controles por el subsistema XR de Unity si el Input System no los ve (ver [Wave XR y OpenXR](#wave-xr-y-openxr)).
   - Con **Unity 2020.3**, usa VIVE OpenXR **2.4.2 o anterior**: desde la 2.5.0 el plugin exige Unity 2021.3. La URL con esa versión está en el paso 5 de la guía.
   - Con Unity 2021.3 o posterior sirve la versión más reciente del plugin.
 - Para los tiempos de CPU y GPU, activa *Player Settings → Frame Timing Stats*. El tiempo del hilo principal solo aparece en builds de desarrollo.
-- Que la app lea la entrada con el Input System (TrackedPoseDriver, XR Interaction Toolkit o tus propias `InputAction`). Lo que use la API antigua `UnityEngine.XR.InputDevices` no se reproduce.
+- Para que la reproducción mueva la app, que lea la entrada con el Input System (TrackedPoseDriver, XR Interaction Toolkit o tus propias `InputAction` sobre `<XRHMD>` / `<XRController>`) o, si no, con `ReplayInput` y `ReplayPoseTargets` (ver [Wave XR y OpenXR](#wave-xr-y-openxr)).
 
 ## Instalación
 
@@ -104,6 +104,17 @@ Al terminar, `report.html` muestra, para cada captura, la grabación, la reprodu
 `SessionPlayer` crea un casco y dos controles virtuales (`ReplayHMD` y `ReplayController`, que heredan de `XRHMD` y `XRController`), desactiva los reales y, antes de cada actualización del Input System, les envía el estado grabado. Todo lo que esté enlazado a `<XRHMD>` o a `<XRController>{LeftHand}`/`{RightHand}` recibe la entrada grabada.
 
 Con *Timing* en **FrameLocked** (el valor por defecto), se reproduce un frame grabado por cada frame y `Time.captureDeltaTime` se fija al delta grabado. Así el tiempo del juego avanza igual que en la grabación aunque el Editor vaya más rápido o más lento. **RealTime** sigue el reloj e interpola, y sirve para ver la sesión a velocidad real.
+
+### Wave XR y OpenXR
+
+re-Play funciona con el plugin que use tu proyecto. El overlay muestra al final de la última línea cuál detectó (`· OpenXR` o `· Wave`) y cada captura lo guarda en `session.xrsc` (`xrBackend`) y en `xr-info.txt`, que lista los subsistemas XR y los dispositivos que ve el Input System y `UnityEngine.XR.InputDevices`.
+
+- **Grabar.** *Capture Source* del *Session Capture Manager*: **Auto** (el valor por defecto) lee el Input System y, si no tiene el dispositivo, el subsistema XR de Unity (`InputDevices`), que alimentan tanto OpenXR como Wave XR. **Input System** y **XR Subsystem** fuerzan una de las dos fuentes. Con el subsistema XR no hay pose de apuntado: se usa la pose del control.
+- **Reproducir con Input System.** Los controles virtuales son `<XRController>` y el casco `<XRHMD>`. Lo atado a esos layouts sigue la reproducción; lo atado a un layout del plugin (por ejemplo `<ViveWaveController>`) no, y re-Play lo avisa en la consola al empezar. Agrega también el binding genérico (`<XRController>{LeftHand}/trigger`).
+- **Reproducir sin depender del Input System.** Agrega el componente `ReplayPoseTargets` (*XR Session Capture → Replay Pose Targets*) y asígnale la cámara y los controles: durante la reproducción los coloca en las poses grabadas, sea cual sea el plugin. Si tu código lee la entrada por su cuenta, llama a `ReplayInput.ReadHead()` / `ReplayInput.ReadController(left)`: devuelven lo grabado mientras se reproduce y lo real el resto del tiempo.
+- *Replay Options → Virtual Devices* (activo por defecto) se puede apagar si no quieres los dispositivos virtuales.
+
+No se probó en un Focus 3 con Wave XR: si la reproducción no mueve tu app, envía el `xr-info.txt` de la captura.
 
 ### Para que las capturas coincidan
 

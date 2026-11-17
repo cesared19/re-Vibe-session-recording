@@ -121,6 +121,15 @@ El plugin VIVE OpenXR es el que permite que la app corra en el Focus 3.
    - En **OpenXR Feature Groups**, activa las funciones de **VIVE XR Support** que el plugin marca como necesarias para el Focus 3.
    - Si aparece un ícono de advertencia ⚠ o de error, ábrelo y pulsa **Fix All**.
 
+### 6.2 bis Si tu proyecto usa Wave XR (Wave SDK / Wave Essence)
+
+Si en *XR Plug-in Management* tu proyecto ya tiene marcado **Wave XR** en lugar de OpenXR, **no lo cambies**: re-Play funciona con los dos.
+
+- Para **grabar** no hay que hacer nada: *Capture Source* en **Auto** lee el Input System y, si no ve el visor o los controles, el subsistema XR de Unity, que Wave alimenta.
+- Para **reproducir**, agrega el componente **Replay Pose Targets** a un objeto de la escena y asígnale la cámara principal y los dos controles (y el *Tracking Space*, normalmente el XR Origin o *Camera Offset*). Durante la reproducción los coloca en las poses grabadas. Si tu código lee los controles con las clases de Wave, cámbialo por `ReplayInput.ReadController(left)` / `ReplayInput.ReadHead()`.
+- Las acciones atadas a `<ViveWaveController>` no siguen la reproducción; re-Play lo avisa en la consola. Agrega el binding `<XRController>{LeftHand}` / `{RightHand}` equivalente.
+- Cada captura trae `xr-info.txt` con lo que ve tu proyecto. Si algo no se mueve, ese archivo dice por qué.
+
 ### 6.3 Player Settings
 
 *Edit → Project Settings → Player*, pestaña de Android:
@@ -443,7 +452,8 @@ Si la publicación falla (build sin registrar, token de solo lectura, sin conexi
 | El overlay no aparece o se ve en un solo ojo | Comprueba que *Show Overlay* esté activo y pulsa Menú + X. Si se ve en un solo ojo, prueba otro *Stereo Rendering Mode* en la configuración de OpenXR y avísanos. |
 | CPU o GPU salen como "—" | Activa *Frame Timing Stats* (paso 6.3). El hilo principal solo aparece en *Development Build*. |
 | *Pull captures from headset* no trae nada | El *App package* debe coincidir exactamente con el *Package Name*, y la app debe haber grabado al menos una sesión. |
-| La reproducción no mueve la cámara | La cámara debe usar *Tracked Pose Driver (Input System)* (o leer el visor con Input System). Lo que use la API antigua `UnityEngine.XR.InputDevices` no se reproduce. |
+| La reproducción no mueve la cámara | La cámara debe usar *Tracked Pose Driver (Input System)* sobre `<XRHMD>`, o bien agrega **Replay Pose Targets** (paso 6.2 bis) que funciona con cualquier plugin XR. En la consola, re-Play avisa de las acciones atadas a un layout del plugin (como `<ViveWaveController>`). |
+| La grabación sale con los controles inmóviles en un proyecto con Wave XR | Abre `xr-info.txt` de la captura: debe decir que el subsistema XR tiene los controles. Prueba *Capture Source* en **XR Subsystem** y envíanos el archivo si sigue igual. |
 | Todas las capturas fallan en el Editor con una sesión grabada en el visor | Calidad, sombras y antialiasing difieren entre el visor y el PC. Compara en el mismo dispositivo o sube *Pixel Threshold*. |
 | El reporte dice "the capture was cut short" | La app se cerró antes de detener la grabación. Se reproduce hasta donde se grabó. |
 | Al importar el paquete, la consola dice `error CS1069: The type name 'ZipArchive' could not be found in the namespace 'System.IO.Compression'` (en `SparkyTCPublisher.cs`) | Pasa con re-Play **0.3.0** en proyectos con el *API Compatibility Level* en *.NET Standard 2.0* (el valor por defecto en Unity 2020.3). Actualiza a **0.3.1 o posterior** con la URL `...re-Vibe-session-recording.git#v0.3.1`. Mientras tanto, también se resuelve cambiando *Edit → Project Settings → Player → Other Settings → Configuration → API Compatibility Level* a **.NET 4.x**, pero eso afecta a todo el proyecto. |

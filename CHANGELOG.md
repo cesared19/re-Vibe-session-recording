@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Added
+
+- Works with **Wave XR** (HTC's Wave SDK / Wave Essence) as well as OpenXR. The overlay shows which plug-in is running (`· OpenXR` or `· Wave`, at the end of its last line), each capture records it (`xrBackend`, `captureSource` in its info) and writes `xr-info.txt` with the XR subsystems and the devices seen by the Input System and by `UnityEngine.XR.InputDevices`; the Editor window shows it too.
+- *Capture Source* on the Session Capture Manager: **Auto** reads the Input System and falls back to Unity's XR input subsystem (`InputDevices`, fed by every XR plug-in) when the Input System doesn't have the headset or a controller; **Input System** and **XR Subsystem** force one of them. That path has no aim pose, so the controller pose stands in for it.
+- `ReplayPoseTargets` component (XR Session Capture → Replay Pose Targets): places the camera and the controllers at the recorded poses during a replay, whatever the XR plug-in, for projects whose tracking doesn't follow the virtual devices. `ReplayInput.ReadHead()` / `ReadController(left)` return the replayed input while replaying and the real one otherwise, for code that reads the devices itself.
+- *Replay Options → Virtual Devices* (on by default) turns the virtual `XRHMD` / `XRController` off. At the start of a replay, re-Play warns in the console about input actions bound to a plug-in's own layout (such as `<ViveWaveController>`), which the generic virtual devices don't feed.
+- Guide step 6.2 bis and README section *Wave XR y OpenXR*, with the two new troubleshooting rows.
+
+### Changed
+
+- The overlay illustrations show the plug-in label.
+
+### Not tested
+
+- Nothing in this update was run on a Focus 3 with Wave XR: it compiles against Unity 2020.3 and 2021.3 and Input System 1.4.3 and 1.7, and the plug-in classifier has unit tests, but the capture fallback and `ReplayPoseTargets` still need a real headset. `xr-info.txt` is there to find out what a Wave project exposes.
+
 ### Fixed
 
 - Compile error in Unity projects that use the .NET Standard 2.0 API level (the default in Unity 2020.3): `error CS1069: The type name 'ZipArchive' could not be found in the namespace 'System.IO.Compression'`, in `SparkyTCPublisher.cs`. The .zip that goes with each published replay is now written by the package's own code (`SimpleZip`), stored without compression since its files are mostly PNG images, so it doesn't depend on that API level. The .zip is valid for Python's `zipfile`, `unzip` and .NET's reader, and the same replay always gives the same bytes.

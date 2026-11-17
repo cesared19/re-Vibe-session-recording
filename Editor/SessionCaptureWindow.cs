@@ -211,7 +211,7 @@ namespace XRSessionCapture.Editor
                     return;
                 }
                 var info = entry.info;
-                EditorGUILayout.LabelField($"{info?.sceneName} · {info?.deviceModel} · {entry.duration:0.0} s · {entry.frames} frames · {entry.screenshots} screenshots" + (entry.truncated ? " · cut short" : ""), EditorStyles.miniLabel);
+                EditorGUILayout.LabelField($"{info?.sceneName} · {info?.deviceModel}{(string.IsNullOrEmpty(info?.xrBackend) ? string.Empty : " · " + info.xrBackend)} · {entry.duration:0.0} s · {entry.frames} frames · {entry.screenshots} screenshots" + (entry.truncated ? " · cut short" : ""), EditorStyles.miniLabel);
                 DrawSparkyTCLink(entry);
 
                 using (new EditorGUILayout.HorizontalScope())
@@ -239,7 +239,7 @@ namespace XRSessionCapture.Editor
 
                 if (info != null)
                 {
-                    EditorGUILayout.LabelField("Recorded", $"{info.createdUtc} on {info.deviceModel} ({info.xrDevice}), {info.applicationId} {info.applicationVersion}, Unity {info.unityVersion}", EditorStyles.wordWrappedMiniLabel);
+                    EditorGUILayout.LabelField("Recorded", $"{info.createdUtc} on {info.deviceModel} ({info.xrDevice}{(string.IsNullOrEmpty(info.xrBackend) ? string.Empty : ", " + info.xrBackend)}{(string.IsNullOrEmpty(info.captureSource) ? string.Empty : ", read from the " + info.captureSource)}), {info.applicationId} {info.applicationVersion}, Unity {info.unityVersion}", EditorStyles.wordWrappedMiniLabel);
                     if (!string.IsNullOrEmpty(info.notes))
                         EditorGUILayout.LabelField("Notes", info.notes, EditorStyles.wordWrappedMiniLabel);
                 }
