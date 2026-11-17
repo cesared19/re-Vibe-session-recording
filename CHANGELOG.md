@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-17
+
 ### Added
 
 - Works with **Wave XR** (HTC's Wave SDK / Wave Essence) as well as OpenXR. The overlay shows which plug-in is running (`· OpenXR` or `· Wave`, at the end of its last line), each capture records it (`xrBackend`, `captureSource` in its info) and writes `xr-info.txt` with the XR subsystems and the devices seen by the Input System and by `UnityEngine.XR.InputDevices`; the Editor window shows it too.
@@ -59,7 +61,8 @@
 - Sample PlayMode regression test.
 - Step-by-step guide in Spanish (`Documentation~/guia-paso-a-paso.md`): PC and headset setup, installation, recording, pulling and replaying a session.
 
-[Unreleased]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cesared19/re-Vibe-session-recording/releases/tag/v0.1.0
