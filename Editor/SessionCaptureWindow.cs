@@ -496,12 +496,20 @@ namespace XRSessionCapture.Editor
 
         static string DefaultAdbPath()
         {
+            var exe = Application.platform == RuntimePlatform.WindowsEditor ? "adb.exe" : "adb";
+            var candidates = new List<string>();
             var sdk = EditorPrefs.GetString("AndroidSdkRoot");
             if (!string.IsNullOrEmpty(sdk))
+                candidates.Add(Path.Combine(sdk, "platform-tools", exe));
+            // Unity's own Android SDK (what it uses when no external one is chosen). Its PlaybackEngines folder is next
+            // to the Editor's data folder on Windows and Linux, and next to Unity.app on macOS.
+            var contents = EditorApplication.applicationContentsPath;
+            candidates.Add(Path.Combine(contents, "PlaybackEngines", "AndroidPlayer", "SDK", "platform-tools", exe));
+            candidates.Add(Path.GetFullPath(Path.Combine(contents, "..", "..", "PlaybackEngines", "AndroidPlayer", "SDK", "platform-tools", exe)));
+            foreach (var candidate in candidates)
             {
-                var adb = Path.Combine(sdk, "platform-tools", Application.platform == RuntimePlatform.WindowsEditor ? "adb.exe" : "adb");
-                if (File.Exists(adb))
-                    return adb;
+                if (File.Exists(candidate))
+                    return candidate;
             }
             return "adb";
         }

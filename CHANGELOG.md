@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Linux.** Setup assistant for Linux (`Tools~/Setup/re-play-setup.sh`, plus `re-Play Setup.desktop` to open it from a file manager): checks Git, Unity (in `~/Unity/Hub/Editor` and Unity Hub's secondary install folder), its Android module, adb and the headset, adds re-Play to a project at a chosen version, installs an `.apk`, opens the app and pulls its captures. Windows are `zenity` or `kdialog` when there is a graphical session and one of them is installed; otherwise it runs in the terminal. It needs bash and perl. When adb reports `no permissions` it explains the udev rule the headset needs. The guide and the README cover Linux.
+
+### Changed
+
+- The Editor window's default adb path also looks for the adb inside Unity's own Android SDK (what Unity uses when no external SDK is set), on Windows, macOS and Linux, before falling back to `adb` on the `PATH`.
+
+### Not tested
+
+- The Linux assistant was run on Linux against a simulated Unity Hub, adb and git, in the terminal and with a stand-in `zenity`; nothing was run with the real `zenity` or `kdialog`, on a real Unity install, with the `.desktop` launcher in a file manager, or with a headset. The `xvfb-run` advice for headless servers was not tried.
+
 ## [0.4.0] - 2026-11-17
 
 ### Added

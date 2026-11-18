@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=re-Play Setup
+Comment=Asistente de instalación de re-Play
+Exec=sh -c 'exec bash "$(dirname "$1")/re-play-setup.sh"' _ %k
+Terminal=true
+Categories=Development;

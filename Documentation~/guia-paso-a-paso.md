@@ -36,13 +36,13 @@ Esta guía cubre todo el proceso: preparar el PC y el visor, instalar el paquete
 | --- | --- |
 | Visor | HTC VIVE Focus 3, actualizado, con sus dos controles cargados. |
 | Cable | USB-C de datos (no solo de carga) entre el visor y el PC. |
-| PC | Windows 10/11 o macOS, con espacio para Unity (unos 15 GB con el módulo de Android). |
+| PC | Windows 10/11, macOS o Linux (una distribución que Unity soporte, como Ubuntu), con espacio para Unity (unos 15 GB con el módulo de Android). |
 | Cuenta de HTC | La del visor, para activar el modo desarrollador si lo pide. |
 | Unity | **2020.3 LTS** (la 2020.3.49f1 sirve) **o posterior**, con el módulo **Android Build Support**. Con 2020.3 hay que usar VIVE OpenXR 2.4.2 (paso 5). |
 | Git | Instalado en el PC: el Package Manager de Unity lo usa para descargar paquetes desde GitHub. |
 | SparkyTC (opcional) | 2.5.0 o posterior, para publicar los resultados como test runs (paso 18). |
 
-> **Atajo: el asistente de instalación.** En la carpeta `Tools~/Setup` del repositorio hay un asistente con ventana para Windows (`re-Play Setup.cmd`) y macOS (`re-Play Setup.command`). Revisa los requisitos de los pasos 2 y 3, hace el paso 8 (agregar re-Play al proyecto), instala el `.apk` en el visor (paso 11, después de compilarlo en Unity) y baja las sesiones (paso 13). Cómo abrirlo está en el README. Los pasos de esta guía siguen sirviendo para hacerlo a mano y para todo lo que ocurre dentro de Unity.
+> **Atajo: el asistente de instalación.** En la carpeta `Tools~/Setup` del repositorio hay un asistente con ventana para Windows (`re-Play Setup.cmd`), macOS (`re-Play Setup.command`) y Linux (`re-play-setup.sh`). Revisa los requisitos de los pasos 2 y 3, hace el paso 8 (agregar re-Play al proyecto), instala el `.apk` en el visor (paso 11, después de compilarlo en Unity) y baja las sesiones (paso 13). Cómo abrirlo está en el README. Los pasos de esta guía siguen sirviendo para hacerlo a mano y para todo lo que ocurre dentro de Unity.
 
 ## 2. Preparar el PC
 
@@ -66,6 +66,15 @@ Esta guía cubre todo el proceso: preparar el PC y el visor, instalar el paquete
 4. **adb.** Viene con el SDK de Android que instala Unity. La ventana del paquete lo busca sola. Si quieres usarlo también desde la terminal, la ruta típica es:
    - Windows: `C:\Program Files\Unity\Hub\Editor\<versión>\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe`
    - macOS: `/Applications/Unity/Hub/Editor/<versión>/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb`
+   - Linux: `~/Unity/Hub/Editor/<versión>/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb`
+
+   **En Linux**, para que adb pueda usar el visor con tu usuario hace falta una regla udev. Si `adb devices` dice `no permissions`, busca el visor con `lsusb`, copia su `idVendor` (el de HTC suele ser `0bb4`) y crea `/etc/udev/rules.d/51-android.rules` con esta línea:
+
+   ```text
+   SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev"
+   ```
+
+   Después ejecuta `sudo udevadm control --reload-rules`, desconecta y vuelve a conectar el cable, y corre `adb kill-server`.
 
    También puedes instalar las [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools) por separado y agregarlas al `PATH`.
 
@@ -326,7 +335,7 @@ Si una captura falla por algo que cambia solo (partículas, un reloj en pantalla
    Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testResults results.xml
    ```
 
-   En Windows, `Unity` es la ruta a `Unity.exe` (por ejemplo, `"C:\Program Files\Unity\Hub\Editor\<versión>\Editor\Unity.exe"`).
+   En Windows, `Unity` es la ruta a `Unity.exe` (por ejemplo, `"C:\Program Files\Unity\Hub\Editor\<versión>\Editor\Unity.exe"`); en Linux, `~/Unity/Hub/Editor/<versión>/Editor/Unity`. En un servidor Linux sin pantalla, antepón `xvfb-run -a` y no uses `-nographics`: las capturas necesitan renderizar (no probado).
 
 ## 18. Conectar con SparkyTC y publicar resultados (opcional)
 
