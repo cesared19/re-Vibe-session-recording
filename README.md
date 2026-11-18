@@ -31,7 +31,7 @@ Cada sesión es una carpeta con:
 
 ## Instalación
 
-### Con el asistente (Windows y macOS)
+### Con el asistente (Windows, macOS y Linux)
 
 El asistente revisa lo que hace falta en el PC, agrega re-Play a tu proyecto de Unity y maneja el visor, sin usar la terminal. No instala nada por su cuenta y usa solo lo que trae el sistema.
 
@@ -39,10 +39,13 @@ El asistente revisa lo que hace falta en el PC, agrega re-Play a tu proyecto de 
 2. Abre la carpeta `Tools~/Setup`:
    - **Windows:** doble clic en `re-Play Setup.cmd`. Si Windows muestra *"Windows protegió su PC"*, pulsa *Más información → Ejecutar de todas formas*.
    - **macOS:** clic derecho en `re-Play Setup.command` → *Abrir* → *Abrir* (solo la primera vez, porque viene de internet).
+   - **Linux:** en una terminal, `bash re-play-setup.sh` desde esa carpeta. Usa ventanas de `zenity` (GNOME y otros) o de `kdialog` (KDE) si están instalados y, si no, funciona en la terminal. También puedes abrir `re-Play Setup.desktop` desde el gestor de archivos (en GNOME, clic derecho → *Permitir ejecutar* la primera vez). Busca Unity en `~/Unity/Hub/Editor` y en la carpeta secundaria que tengas en Unity Hub. Necesita `bash` y `perl`.
 3. El asistente muestra:
    - **Lo que hace falta:** Git, Unity, el módulo Android de Unity, adb y el visor conectado, cada uno como *Listo* o *Falta*, con cómo resolverlo.
    - **Proyecto de Unity:** eliges la carpeta y la versión, y agrega re-Play a `Packages/manifest.json` (deja una copia en `manifest.json.bak`).
    - **Visor:** instala el `.apk` que compiló Unity, abre la app y baja las sesiones grabadas a `SessionCaptures/` del proyecto.
+
+En Linux, si el visor aparece como *no permissions*, el asistente explica la regla udev que falta (también está en el paso 2 de la guía).
 
 El asistente no compila la app ni configura OpenXR: eso se hace en Unity (pasos 5 a 7 y 11 de la guía).
 
