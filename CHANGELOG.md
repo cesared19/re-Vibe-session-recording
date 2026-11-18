@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-18
+
 ### Added
 
 - **Linux.** Setup assistant for Linux (`Tools~/Setup/re-play-setup.sh`, plus `re-Play Setup.desktop` to open it from a file manager): checks Git, Unity (in `~/Unity/Hub/Editor` and Unity Hub's secondary install folder), its Android module, adb and the headset, adds re-Play to a project at a chosen version, installs an `.apk`, opens the app and pulls its captures. Windows are `zenity` or `kdialog` when there is a graphical session and one of them is installed; otherwise it runs in the terminal. It needs bash and perl. When adb reports `no permissions` it explains the udev rule the headset needs. The guide and the README cover Linux.
@@ -73,7 +75,8 @@
 - Sample PlayMode regression test.
 - Step-by-step guide in Spanish (`Documentation~/guia-paso-a-paso.md`): PC and headset setup, installation, recording, pulling and replaying a session.
 
-[Unreleased]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/cesared19/re-Vibe-session-recording/compare/v0.1.0...v0.2.0

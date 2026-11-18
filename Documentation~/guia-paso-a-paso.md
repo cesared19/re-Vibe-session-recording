@@ -181,7 +181,7 @@ El paquete lee el visor y los controles a través del Input System, igual que el
 
 3. Pulsa **Add**. En la lista aparece **XR Session Capture**. Si falta, instala también el **Input System** 1.7 o posterior.
 
-Para fijar una versión, agrega la etiqueta al final de la URL, por ejemplo `#v0.4.0`. Para pasar a otra versión de un paquete fijado, vuelve a pegar la URL con la etiqueta nueva en **Add package from git URL…** (reemplaza la anterior), o cambia la etiqueta en `Packages/manifest.json`. El asistente de instalación también lo hace: eliges la versión y pulsa **Agregar re-Play al proyecto**. Sin etiqueta, el Package Manager sigue la rama principal y su botón **Update** actualiza el paquete.
+Para fijar una versión, agrega la etiqueta al final de la URL, por ejemplo `#v0.5.0`. Para pasar a otra versión de un paquete fijado, vuelve a pegar la URL con la etiqueta nueva en **Add package from git URL…** (reemplaza la anterior), o cambia la etiqueta en `Packages/manifest.json`. El asistente de instalación también lo hace: eliges la versión y pulsa **Agregar re-Play al proyecto**. Sin etiqueta, el Package Manager sigue la rama principal y su botón **Update** actualiza el paquete.
 
 > **Alternativa sin Git:** descarga el repositorio como .zip desde GitHub (*Code → Download ZIP*), descomprímelo y usa **+ → Add package from disk…**, eligiendo el archivo `package.json` de esa carpeta.
 
